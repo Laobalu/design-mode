@@ -13,4 +13,19 @@ class Single {
     return Single.instance;
   }
 }
+const a = Single.getInstance();
+const a = Single.getInstance();
+console.log(a === b); // true
+```
+es5可以用闭包来实现
+```javascript
+Single.protoptye.getInstance = (function() {
+  var instance = null;
+  return function() {
+    if (!instance) {
+      instance = new Single();
+    }
+    return instance;
+  }
+})()
 ```

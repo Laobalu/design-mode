@@ -1,23 +1,13 @@
-class Singleton {
-  private static instance: Singleton;
-  private constructor() {
-    // ..
-  }
-
-  public static getInstance() {
-    if (!Singleton.instance) {
-      Singleton.instance = new Singleton();
+class Single {
+  private static instance: Single;
+  static getInstance() {
+    if (!this.instance) { // 静态方法this指向类，而不是实例
+      this.instance = new Single();
     }
-
-    return Singleton.instance;
+    return Single.instance;
   }
-
-  someMethod() {}
 }
-
-// let someThing = new Singleton(); // Error: constructor of 'singleton' is private
-
-let instacne = Singleton.getInstance(); // do some thing with the instance
-let instacne2 = Singleton.getInstance(); // do some thing with the instance
-
-console.log(instacne === instacne2)
+const a = Single.getInstance();
+const b = Single.getInstance();
+console.log(a)
+console.log(a === b); // true
