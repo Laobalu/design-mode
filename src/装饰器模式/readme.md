@@ -84,7 +84,12 @@ class Demo{
 }
 const foo = new Demo();
 console.log(foo.fn1()); // 输出 fn1
-```
+```  
+    @decorator
+    class A()
+    其实可以看作
+    class A {};
+    A = decorator(A) || A
 ### 修饰类的方法
 ```js
 /**
