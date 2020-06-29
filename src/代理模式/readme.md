@@ -9,3 +9,65 @@
 代理模式的变体有多种：保护代理、虚拟代理、缓存代理等等，这里只介绍这常用的三种。
 ### 保护代理
 保护代理主要用于控制不同权限的对象**对本体对象的访问权限**，符合条件的才能访问，起到过滤作用。
+```javascript
+class Visitor {
+  constructor(name, level) {
+    this.name = name;
+    this.level = level;
+  }
+  getName() {
+    return this.name;
+  }
+  getLevel() {
+    return this.level;
+  }
+  gotoDancingFloor() {
+    console.log('去舞池！');
+  }
+  gotoRoom() {
+    console.log('去包厢！');
+  }
+}
+
+// 导游（代理用户）
+class TourGuide {
+  constructor(visitor) {
+    this.visitor = visitor;
+  }
+  getName() {
+    this.visitor.getName();
+  }
+  getLevel() {
+    this.visitor.getLevel();
+  }
+  gotoDancingFloor() {
+    if (this.visitor.getLevel() >= 1) {
+      console.log('去舞池！');
+    } else {
+      console.log('无权限！');
+    }
+  }
+  gotoRoom() {
+    if (this.visitor.getLevel() >= 3) {
+      console.log('去包厢！');
+    } else {
+      console.log('无权限！');
+    }
+  }
+}
+
+const visitor1 = new Visitor('lilei', 1);
+const visitor2 = new Visitor('fofo', 3);
+
+const guide1 = new TourGuide(visitor1)
+const guide2 = new TourGuide(visitor2)
+
+guide1.gotoDancingFloor();
+guide1.gotoRoom();
+
+guide2.gotoDancingFloor();
+guide2.gotoRoom();
+```  
+本例中游客与导游（游客代理）具有相同接口，游客本身只关心自己的行为。我们调用导游类，在满足条件时，执行与本体相同的代码。这里导游就是保护代理，起到过滤作用。  
+
+### 虚拟代理
