@@ -8,7 +8,7 @@
   
 代理模式的变体有多种：保护代理、虚拟代理、缓存代理等等，这里只介绍这常用的三种。
 ### 保护代理
-保护代理主要用于控制不同权限的对象**对本体对象的访问权限**，符合条件的才能访问，起到过滤作用。
+>保护代理主要用于控制不同权限的对象**对本体对象的访问权限**，符合条件的才能访问，起到过滤作用。
 ```javascript
 class Visitor {
   constructor(name, level) {
@@ -70,4 +70,60 @@ guide2.gotoRoom();
 ```  
 本例中游客与导游（游客代理）具有相同接口，游客本身只关心自己的行为。我们调用导游类，在满足条件时，执行与本体相同的代码。这里导游就是保护代理，起到过滤作用。  
 
-### 虚拟代理
+### 虚拟代理  
+>对本体方法的调用进行管理，等时机合适再执行。  
+作用：将开销很大的对象，延迟到真正需要它的时候再执行。  
+
+图片预加载：当网络不好或者图片太大，页面加载图片时间过长，会导致用户体验不好。这时我们就需要预加载处理，先让img标签展示一个打底图片，然后新创建一个img标签去加载大图，监听大图加载完成，网站有了大图的缓存后，然后将页面上img的src指向大图地址。因为有缓存的关系，所有从打底图到真实图片的切换非常快，大大优化用户体验。
+
+请看下面预加载例子
+```javascript
+class Preload{
+  static preloadSrc = 'xxx';
+  constructor(imgNode) {
+    this.imgNode = imgNode;
+  }
+  setSrc(realUrl) {
+    this.imgNode.src = this.preloadSrc;
+    // 创建一个用来加载真实地址的中转img对象
+    const tempImg = new Image();
+    tempImg.src = realUrl;
+    tempImg.onload = () => {
+      // 当图片加载完成，imgNode加载真实地址
+      this.imgNode.src = realUrl;
+    }
+  }
+}
+```
+Preload类不仅要负责图片的加载，还要负责dom的操作。这样其实违反了**单一职责原则**。我们可以通过虚拟代理将逻辑分离，LoadImg负责设置图片地址，LoadImgProxy负责加载图片。
+
+```javascript
+class LoadImg {
+  constructor(imgNode) {
+    this.imgNode = imgNode;
+  }
+  setSrc(url) {
+    this.imgNode.src = url;
+  }
+}
+
+class LoadImgProxy {
+  static preloadSrc = 'xxx';
+  constructor(targetImg) {
+    this.targetImg = targetImg;    
+  }
+  setSrc(realUrl) {
+    this.targetImg.setSrc(this.preloadSrc);
+    const img = new Image();
+    img.src = realUrl;
+    img.onload = () => {
+      this.targetImg.setSrc(realUrl);
+    }
+  }
+}
+
+const realUrl = 'ccc';
+const loadProxy = LoadImgProxy(new LoadImg(imgNode));
+loadProxy.setSrc(realUrl)
+```
+这里LoadImgProxy实现了图片预加载的相关工作，LoadImg只需关心它的本职工作，设置图片地址。例子里面新建的img标签代替了真是的dom去请求图片，完成图片加载工作，却没在渲染层出现，因此这种模式被称为虚拟代理模式。当未来网络已经快到不需要预加载，我们只需要去掉LoadImgProxy即可。
