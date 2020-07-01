@@ -68,7 +68,7 @@ guide1.gotoRoom();
 guide2.gotoDancingFloor();
 guide2.gotoRoom();
 ```  
-本例中游客与导游（游客代理）具有相同接口，游客本身只关心自己的行为。我们调用导游类，在满足条件时，执行与本体相同的代码。这里导游就是保护代理，起到过滤作用。  
+本例中游客与导游（游客代理）具有相同接口，游客本身只关心自己的行为。我们调用导游类，在满足条件时，执行与本体相同的代码。这里导游就是保护代理，起到过滤作用。当我们需要保护代理时，可以优先使用es6新增的proxy实现。  
 
 ### 虚拟代理  
 >对本体方法的调用进行管理，等时机合适再执行。  
@@ -126,4 +126,35 @@ const realUrl = 'ccc';
 const loadProxy = LoadImgProxy(new LoadImg(imgNode));
 loadProxy.setSrc(realUrl)
 ```
-这里LoadImgProxy实现了图片预加载的相关工作，LoadImg只需关心它的本职工作，设置图片地址。例子里面新建的img标签代替了真是的dom去请求图片，完成图片加载工作，却没在渲染层出现，因此这种模式被称为虚拟代理模式。当未来网络已经快到不需要预加载，我们只需要去掉LoadImgProxy即可。
+这里LoadImgProxy实现了图片预加载的相关工作，LoadImg只需关心它的本职工作，设置图片地址。例子里面新建的img标签代替了真是的dom去请求图片，完成图片加载工作，却没在渲染层出现，因此这种模式被称为虚拟代理模式。当未来网络已经快到不需要预加载，我们只需要去掉LoadImgProxy直接使用LoadImg即可。
+
+### 缓存代理
+缓存代理为一些开销大的运算提供缓存，以空间换时间。
+```javascript
+function mult() {
+  const args = Array.from(arguments);
+  return args.reduce((prev, next) => prev * next);
+}
+
+const test = mult(1, 2, 3); // 6
+
+const multProxy = (function() {
+  const cache = {};
+
+  return function() {
+    const args = Array.from(arguments);
+    const key = args.join(',');
+    if (!cache[key]) {
+      console.log('mult')
+      cache[key] = mult(...args);
+    }
+    return cache[key];
+  }
+})()
+
+const test1 = multProxy(1, 2, 3); // mult 6
+const test2 = multProxy(1, 2, 3); // 6
+```
+
+### 小结
+从以上案例可以看出代理模式的变种多样，访问权限、功能拓展、性能优化等等。但代理模式的套路都基本一致：A不能直接访问B，A需要借助一个代理器去访问B。代理器与B有着相同的接口。
